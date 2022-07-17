@@ -1,0 +1,39 @@
+SQLite db for all data
+    add tables for each station
+        the same station datbase format
+            table name = city_name
+                # id - PK
+                date - DT, PK ?
+                prcp - float
+                tmax - float
+                tmin - float
+                sation - varchar(100)
+
+how to fill in the station db?:
+    connect to db
+
+    open file
+    take header
+
+    define row numbers
+
+    for loop per line
+        define city_name
+            if not city_name
+                if station_name
+                    city_name = station_name
+                else
+                    city_name = from_row
+                create table city_name
+
+        write date (currentdate)
+
+        if prcpROW:
+            prcp = f", {prcpROW}"
+            prcpQ = ', prsp'
+        else:
+            prcp = ''
+            prcpQ = ''
+
+        query = f"INSERT INTO {city_name}(cur_date {prcpQ}) VALUES ({currentdate} {prcp})
+        sqlite.make(query) 
