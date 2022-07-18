@@ -37,3 +37,6 @@ how to fill in the station db?:
 
         query = f"INSERT INTO {city_name}(cur_date {prcpQ}) VALUES ({currentdate} {prcp})
         sqlite.make(query) 
+
+
+

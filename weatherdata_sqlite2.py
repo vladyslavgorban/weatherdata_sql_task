@@ -1,7 +1,5 @@
 """fill in the station table in db"""
 
-from pymysql import Date
-from requests import session
 from sqlalchemy import MetaData, DATE, NUMERIC, VARCHAR, create_engine, Table, Column, Integer, String, Text, insert
 from sqlalchemy.orm import Session
 import csv
@@ -92,7 +90,7 @@ def add_weather_station(filepath, station_name):
                 query_insert_names = "cur_date, prcp" + tmax_insert_query + tmin_insert_query
                 query_insert_values = f"'{currentdate}', {prcp}{tmax}{tmin}"
                 query_insert = f"INSERT INTO {city_name}({query_insert_names}) VALUES({query_insert_values});"
-                print(query_insert)
+                # print(query_insert)
 
                 session.execute(query_insert)
 
