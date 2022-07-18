@@ -3,7 +3,7 @@ SQLite db for all data
         the same station datbase format
             table name = city_name
                 # id - PK
-                date - DT, PK ?
+                cur_date - DT, PK ?
                 prcp - float
                 tmax - float
                 tmin - float

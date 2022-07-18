@@ -1,16 +1,20 @@
 """fill in the station table in db"""
 
-from sqlalchemy import create_engine
+from distutils.util import execute
+from pymysql import Date
+from sqlalchemy import MetaData, DATE, NUMERIC, VARCHAR, create_engine, Table, Column, Integer, String, Text, insert
 import csv
 from datetime import datetime
 
-def add_weather_station(self, filepath, station_name=None):
+def add_weather_station(filepath, station_name=None):
     """
     open CSV and store data to dict named by station
     sent data to tables in SQLite db
     """
 
+    # connects to sqlite db
     engine = create_engine("sqlite+pysqlite:///weather.db", echo=True, future=True)
+    conn = engine.connect()
 
     with open('data/kyiv_weather_2022.csv') as f:
         reader = csv.reader(f)
@@ -48,6 +52,20 @@ def add_weather_station(self, filepath, station_name=None):
                 else:
                     # else take first word from station name in CSV
                     city_name = row[data_columns['name']].split()[0] 
+
+                # create table
+                metadata_obj = MetaData()
+                
+                weatherdata_station = Table(
+                    city_name,
+                    metadata_obj,
+                    Column('cur_date', DATE, primary_key=True),
+                    Column('prcp', NUMERIC(4.2)),
+                    Column('tmax', NUMERIC(3.1)),
+                    Column('tmin', NUMERIC(3.1)),
+                    Column('station', VARCHAR(1000), default=city_name)
+                ) 
+                metadata_obj.create_all(engine)
             
             # get data as primaty key
             currentdate = datetime.strptime(row[data_columns['date']], "%Y-%m-%d")
@@ -57,28 +75,46 @@ def add_weather_station(self, filepath, station_name=None):
                 prcp = float(row[data_columns['prcp']])
             except ValueError:
                 prcp = 0
+                # print(f"no prcp for {currentdate}")
             
             # get tmax if exist
             try:
                 tmax = float(row[data_columns['tmax']])
             except ValueError:
-                tmax = ''
+                tmax = None
                 tmax_insert_query = ''
+                # print(f"no tmax for {currentdate}")
             else:
-                tmax = f", {tmax}"
-                tmax_insert_query = f", {tmax}"
+                # tmax = f", {tmax}"
+                tmax_insert_query = f", tmax={tmax}"
 
              # get tmin if exist
             try:
                 tmin = float(row[data_columns['tmin']])
             except ValueError:
-                tmin = ''
+                tmin = None
                 tmin_insert_query = ''
+                # print(f"no tmin for {currentdate}")
             else:
-                tmin = f", {tmin}"
-                tmin_insert_query = f", {tmin}"
+                # tmin = f", {tmin}"
+                tmin_insert_query = f", tmin={tmin}"
 
             # prepare query to add data to table
-            query_insert = f"cur_date, prcp{tmax_insert_query}{tmin_insert_query}"
-            query_values = f"{currentdate}, {prcp}{tmax}{tmin}"
-            add_line_query = f"INSERT INTO {city_name}({query_insert}) VALUES({query_values})"
+            # query_1 = "cur_date = currentdate, prcp = prcp"
+            # query_2 = f"{tmax_insert_query}{tmin_insert_query}"
+            # query = query_1 + query_2
+            # print(query)
+
+            ins = weatherdata_station.insert().values(
+                cur_date = currentdate,
+                prcp = prcp,
+                tmax = tmax,
+                tmin = tmin
+            )
+            # ins = insert(weatherdata_station).values(query)
+
+            r = conn.execute(ins)
+            print(r.inserted_primary_key)
+
+if __name__ == '__main__':
+    add_weather_station('data/kyiv_weather_2022.csv', station_name='test')
