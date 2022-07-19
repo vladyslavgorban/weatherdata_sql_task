@@ -39,4 +39,21 @@ how to fill in the station db?:
         sqlite.make(query) 
 
 
+Create CLASS for all station tables inside(staion*)
+    engine = create_engine
+    metadata_obj = MetaData()
 
+    loop for all station
+        create table
+
+        write data from csv to table
+
+    
+
+SELECT * FROM (
+    SELECT *, 'kyiv' FROM kyiv
+    UNION ALL
+    SELECT *, 'barca' FROM barca
+    )
+    order by cur_date
+    LIMIT 20;

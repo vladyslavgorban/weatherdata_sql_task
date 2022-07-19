@@ -24,8 +24,7 @@ def add_weather_station(filepath, station_name):
         Column('cur_date', DATE, primary_key=True),
         Column('prcp', NUMERIC(4.2)),
         Column('tmax', NUMERIC(3.1)),
-        Column('tmin', NUMERIC(3.1)),
-        Column('station', VARCHAR(1000), default=station_name)
+        Column('tmin', NUMERIC(3.1))
     ) 
     metadata_obj.create_all(engine)
 
@@ -94,4 +93,6 @@ def add_weather_station(filepath, station_name):
             conn.commit()
 
 if __name__ == '__main__':
-    add_weather_station('data/kyiv_weather_2022.csv', station_name='test4')
+    add_weather_station('data/kyiv_weather_2022.csv', station_name='kyiv')
+    add_weather_station('data/BARCELONA_weather_2022.csv', station_name='barca')
+    add_weather_station('data/HEATHROW_weather_2022.csv', station_name='london')
