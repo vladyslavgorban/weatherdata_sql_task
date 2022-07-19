@@ -30,7 +30,7 @@ def add_weather_station(filepath, station_name):
     metadata_obj.create_all(engine)
 
     # read data from CSV
-    with open('data/kyiv_weather_2022.csv') as f:
+    with open(filepath) as f:
         reader = csv.reader(f)
         header_row = next(reader)
 
