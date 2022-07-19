@@ -21,7 +21,7 @@ class WeatherData():
     def get_data_from_csv(self, name, filepath):
         """get data from given csv filepath and store it to named table in db"""
         if name in self.metadata_obj.tables:
-            print(f"Table '{name} already exsists. Rename or delete'")
+            print(f"Table '{name}' already exsists. Rename or delete'")
             return
         
         # create table
@@ -117,21 +117,33 @@ class WeatherData():
 
     def join_weatherdata(self):
         """join all weather data in one table???"""
+        table_name = ""
+        query = "SELECT * FROM ("
         for table in self.metadata_obj.tables:
+            if table_name: query += " UNION ALL "
             table_name = str(table)
-            tables = tables + " " + table_name
-        print(tables)
+            query += f"SELECT *, '{table_name}' FROM {table_name}"
+        query += ") ORDER BY cur_date;"
+
+        with self.engine.connect() as conn:
+            weather_data = []
+            for row in conn.execute(text(query)):
+                weather_data.append(row)
+
+        return weather_data
         
 
 if __name__ == '__main__':
     wd = WeatherData()
-    wd.get_data_from_csv('barca', 'data/BARCELONA_weather_2022.csv')
+    # wd.get_data_from_csv('barca', 'data/BARCELONA_weather_2022.csv')
     # wd.get_data_from_csv('kyiv', 'data/kyiv_weather_2022.csv')
     # wd.get_data_from_csv('london', 'data/HEATHROW_weather_2022.csv')
+
+    all_data = wd.join_weatherdata()
+    # i = 0
+    # for row in all_data:
+    #     print(row)
+    #     i += 1
+    #     if i > 10: break
     
-    # with wd.engine.connect() as conn:
-    #     i = 0
-    #     for row in conn.execute(text("select * from kyiv")):
-    #         print(row)
-    #         i += 1
-    #         if i > 10: break
+    print(all_data[-10:])
