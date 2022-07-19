@@ -20,6 +20,10 @@ class WeatherData():
 
     def get_data_from_csv(self, name, filepath):
         """get data from given csv filepath and store it to named table in db"""
+        if name in self.metadata_obj.tables:
+            print(f"Table '{name} already exsists. Rename or delete'")
+            return
+        
         # create table
         self._create_table(name)
 
@@ -35,33 +39,14 @@ class WeatherData():
             with self.engine.connect() as conn:
                 # going through CVS line by line, send data to db table
                 for row in self.reader:
-                    # get data as primaty key
-                    currentdate = datetime.strptime(row[self.data_columns['date']], "%Y-%m-%d")
-
-                    # get pscp if exists, else = 0
-                    try:
-                        prcp = float(row[self.data_columns['prcp']])
-                    except ValueError:
-                        prcp = 0
-                    
-                    # get tmax if exist
-                    try:
-                        tmax = float(row[self.data_columns['tmax']])
-                    except ValueError:
-                        tmax = None
-
-                    # get tmin if exist
-                    try:
-                        tmin = float(row[self.data_columns['tmin']])
-                    except ValueError:
-                        tmin = None
+                    self._get_csv_line_for_query(row)
 
                     # insert row for current date
                     ins = self.metadata_obj.tables[name].insert().values(
-                        cur_date = currentdate,
-                        prcp = prcp,
-                        tmax = tmax,
-                        tmin = tmin
+                        cur_date = self.currentdate,
+                        prcp = self.prcp,
+                        tmax = self.tmax,
+                        tmin = self.tmin
                     )
                     conn.execute(ins)
             
@@ -71,15 +56,18 @@ class WeatherData():
     def _create_table(self, name):
         """cteate table for weatherdata with gien name"""
         # create table
-        Table(
-            name,
-            self.metadata_obj,
-            Column('cur_date', DATE, primary_key=True),
-            Column('prcp', NUMERIC(4.2)),
-            Column('tmax', NUMERIC(3.1)),
-            Column('tmin', NUMERIC(3.1))
-        ) 
-        self.metadata_obj.create_all(self.engine)
+        if name in self.metadata_obj.tables:
+            print(f"Table '{name} already exsists. Rename or delete'")
+        else:
+            Table(
+                name,
+                self.metadata_obj,
+                Column('cur_date', DATE, primary_key=True),
+                Column('prcp', NUMERIC(4.2)),
+                Column('tmax', NUMERIC(3.1)),
+                Column('tmin', NUMERIC(3.1))
+            ) 
+            self.metadata_obj.create_all(self.engine)
 
     def _define_csv_col_number(self):
         """define which column in csv correcponds to weather datatype"""
@@ -104,21 +92,46 @@ class WeatherData():
             elif self.header_row[col_num] == 'TMIN':
                 self.data_columns['tmin'] = col_num
 
-    def _get_csv_line_for_query(self):
-        """read the csv line and prepare da"""
+    def _get_csv_line_for_query(self, row):
+        """read the csv line and prepare variables for `query`"""
+        # get data as primaty key
+        self.currentdate = datetime.strptime(row[self.data_columns['date']], "%Y-%m-%d")
+
+        # get pscp if exists, else = 0
+        try:
+            self.prcp = float(row[self.data_columns['prcp']])
+        except ValueError:
+            self.prcp = 0
+        
+        # get tmax if exist
+        try:
+            self.tmax = float(row[self.data_columns['tmax']])
+        except ValueError:
+            self.tmax = None
+
+        # get tmin if exist
+        try:
+            self.tmin = float(row[self.data_columns['tmin']])
+        except ValueError:
+            self.tmin = None
 
     def join_weatherdata(self):
         """join all weather data in one table???"""
+        for table in self.metadata_obj.tables:
+            table_name = str(table)
+            tables = tables + " " + table_name
+        print(tables)
+        
 
 if __name__ == '__main__':
     wd = WeatherData()
-    # wd.get_data_from_csv('barca', 'data/BARCELONA_weather_2022.csv')
+    wd.get_data_from_csv('barca', 'data/BARCELONA_weather_2022.csv')
     # wd.get_data_from_csv('kyiv', 'data/kyiv_weather_2022.csv')
     # wd.get_data_from_csv('london', 'data/HEATHROW_weather_2022.csv')
     
-    with wd.engine.connect() as conn:
-        i = 0
-        for row in conn.execute(text("select * from kyiv")):
-            print(row)
-            i += 1
-            if i > 10: break
+    # with wd.engine.connect() as conn:
+    #     i = 0
+    #     for row in conn.execute(text("select * from kyiv")):
+    #         print(row)
+    #         i += 1
+    #         if i > 10: break
