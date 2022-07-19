@@ -48,12 +48,15 @@ Create CLASS for all station tables inside(staion*)
 
         write data from csv to table
 
-    
+on command JOIN ALL STATIOS DATA in one table   
 
-SELECT * FROM (
-    SELECT *, 'kyiv' FROM kyiv
-    UNION ALL
-    SELECT *, 'barca' FROM barca
-    )
-    order by cur_date
-    LIMIT 20;
+    query like this:
+    SELECT * FROM (
+        SELECT *, 'kyiv' FROM kyiv
+        UNION ALL
+        SELECT *, 'barca' FROM barca
+        UNION ALL
+        SELECT *, 'london' FROM london
+        )
+        order by cur_date
+        LIMIT 20;

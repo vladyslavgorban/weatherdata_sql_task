@@ -15,9 +15,9 @@ def add_weather_station(filepath, station_name):
     # connects to sqlite db
     engine = create_engine("sqlite+pysqlite:///weather.db", echo=True, future=True)
     
-    # create table
     metadata_obj = MetaData()
     
+    # create table
     weatherdata_station = Table(
         station_name,
         metadata_obj,
