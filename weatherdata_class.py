@@ -115,8 +115,8 @@ class WeatherData():
         except ValueError:
             self.tmin = None
 
-    def join_weatherdata(self):
-        """join all weather data in one table???"""
+    def join_weatherdata_query(self):
+        """join all weather data in one table row by row"""
         table_name = ""
         query = "SELECT * FROM ("
         for table in self.metadata_obj.tables:
@@ -125,12 +125,45 @@ class WeatherData():
             query += f"SELECT *, '{table_name}' FROM {table_name}"
         query += ") ORDER BY cur_date;"
 
-        with self.engine.connect() as conn:
-            weather_data = []
-            for row in conn.execute(text(query)):
-                weather_data.append(row)
+        return query
 
-        return weather_data
+    def join_weatherdata_rows(self, header_line=False):
+        """join all weather data in one table row by row tables"""
+        query = self.join_weatherdata_query()
+        
+        if header_line: 
+            weather_data_rows = [['cur_date', 'prcp', 'tmax', 'tmin', 'station']]
+        else: 
+            weather_data_rows = []
+                
+        # connect to db and go row by row
+        with self.engine.connect() as conn:
+       
+            for row in conn.execute(text(query)):
+                weather_data_row = []
+                for datatype in range(len(row)):
+                    value = row[datatype]
+                    weather_data_row.append(value)
+                weather_data_rows.append(weather_data_row)
+
+        return weather_data_rows
+
+    def join_weatherdata_columns_dict(self):
+        """join all weather data in one table column by column as dict"""
+        weather_data_columns = {
+            'cur_date': '',
+            'prcp': '',
+            'tmax': '',
+            'tmin': ''
+        }
+        query = self.join_weatherdata_query()
+
+        with self.engine.connect() as conn:
+            weather_data_columns = []
+            for row in conn.execute(text(query)):
+                weather_data_columns.append(row)
+
+        return weather_data_columns
         
 
 if __name__ == '__main__':
@@ -139,11 +172,18 @@ if __name__ == '__main__':
     # wd.get_data_from_csv('kyiv', 'data/kyiv_weather_2022.csv')
     # wd.get_data_from_csv('london', 'data/HEATHROW_weather_2022.csv')
 
-    all_data = wd.join_weatherdata()
-    # i = 0
-    # for row in all_data:
-    #     print(row)
-    #     i += 1
-    #     if i > 10: break
+    # all_data = wd.join_weatherdata_rows()
+    # print(all_data[:10])
+
+    table_name = wd.metadata_obj.tables['kyiv']
+    col_name = "tmax"
+    lim = 10
+
+    query = f"SELECT {col_name} FROM {table_name} LIMIT {lim};"
+
+    with wd.engine.connect() as conn:
+        result = conn.execute(text(query))
+        values = result.fetchall()
+        print(values)
+
     
-    print(all_data[-10:])
