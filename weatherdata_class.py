@@ -143,42 +143,63 @@ class WeatherData():
        
             for row in conn.execute(text(query)):
                 weather_data_row = []
-                for datatype in range(len(row)):
-                    value = row[datatype]
+                for wd_data in range(len(row)):
+                    # set correct type:
+                    if self.weatherdatatypes[wd_data] == 'cur_date':
+                        value = datetime.strptime(row[wd_data], "%Y-%m-%d")
+                    else:
+                        try:
+                            value = float(row[wd_data])
+                        except:
+                            value = None
                     weather_data_row.append(value)
                 weather_data_rows.append(weather_data_row)
 
         return weather_data_rows
 
-    def join_weatherdata_columns_dict(self):
-        """join all weather data in one table column by column as dict"""
+    # def join_weatherdata_columns_dict(self):
+    #     """join all weather data in one table column by column as dict"""
                 
+    #     weather_data_columns = {name: list() for name in self.weatherdatatypes}
+
+    #     query = self._join_weatherdata_query()
+
+    #     with self.engine.connect() as conn:
+    #         for row in conn.execute(text(query)):
+    #             for datatype in range(len(self.weatherdatatypes)):
+    #                 if self.weatherdatatypes[datatype] == 'cur_date':
+    #                     value = datetime.strptime(row[datatype], "%Y-%m-%d")
+    #                 else:
+    #                     value = float(row[datatype])
+    #                 weather_data_columns[self.weatherdatatypes[datatype]].append(value)
+
+    #     return weather_data_columns
+
+    def get_station_data_columns(self, station_name=None):
+        """dict with weather data for all db or given station"""
+
         weather_data_columns = {name: list() for name in self.weatherdatatypes}
 
-        query = self._join_weatherdata_query()
-
-        with self.engine.connect() as conn:
-            for row in conn.execute(text(query)):
-                for datatype in range(len(self.weatherdatatypes)):
-                    if self.weatherdatatypes[datatype] == 'cur_date':
-                        value = datetime.strptime(row[datatype], "%Y-%m-%d")
-                    else:
-                        value = float(row[datatype])
-                    weather_data_columns[self.weatherdatatypes[datatype]].append(value)
-
-        return weather_data_columns
-
-    def get_station_data_columns(self, station_name):
-        """dict with weather data for given station"""
-
-        weather_data_columns = {name: list() for name in self.weatherdatatypes}
-
-        query = f"SELECT * FROM {station_name};"
+        if station_name:
+            query = f"SELECT * FROM {station_name};"
+        else:
+            query = self._join_weatherdata_query()
         
         with self.engine.connect() as conn:
             for row in conn.execute(text(query)):
-                for datatype in range(len(self.weatherdatatypes) - 1):
-                    weather_data_columns[self.weatherdatatypes[datatype]].append(row[datatype])
+                for wd_data in range(len(row)):
+                    # set correct type:
+                    if self.weatherdatatypes[wd_data] == 'cur_date':
+                        value = datetime.strptime(row[wd_data], "%Y-%m-%d")
+                    elif self.weatherdatatypes[wd_data] == 'station':
+                        value = row[wd_data]
+                    else:
+                        try:
+                            value = float(row[wd_data])
+                        except:
+                            value = None
+
+                    weather_data_columns[self.weatherdatatypes[wd_data]].append(value)
 
         return weather_data_columns
 
