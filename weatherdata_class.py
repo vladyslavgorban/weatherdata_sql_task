@@ -18,6 +18,8 @@ class WeatherData():
         # include all existind db's
         self.metadata_obj.reflect()
 
+        self.weatherdatatypes = ['cur_date', 'prcp', 'tmax', 'tmin', 'station']
+
     def get_data_from_csv(self, name, filepath):
         """get data from given csv filepath and store it to named table in db"""
         if name in self.metadata_obj.tables:
@@ -43,10 +45,10 @@ class WeatherData():
 
                     # insert row for current date
                     ins = self.metadata_obj.tables[name].insert().values(
-                        cur_date = self.currentdate,
-                        prcp = self.prcp,
-                        tmax = self.tmax,
-                        tmin = self.tmin
+                        cur_date = self._currentdate,
+                        prcp = self._prcp,
+                        tmax = self._tmax,
+                        tmin = self._tmin
                     )
                     conn.execute(ins)
             
@@ -54,10 +56,10 @@ class WeatherData():
                 conn.commit()
     
     def _create_table(self, name):
-        """cteate table for weatherdata with gien name"""
+        """cteate table for weatherdata with given name"""
         # create table
         if name in self.metadata_obj.tables:
-            print(f"Table '{name} already exsists. Rename or delete'")
+            print(f"Table '{name}' already exsists. Skipped. Rename or delete")
         else:
             Table(
                 name,
@@ -95,27 +97,27 @@ class WeatherData():
     def _get_csv_line_for_query(self, row):
         """read the csv line and prepare variables for `query`"""
         # get data as primaty key
-        self.currentdate = datetime.strptime(row[self.data_columns['date']], "%Y-%m-%d")
+        self._currentdate = datetime.strptime(row[self.data_columns['date']], "%Y-%m-%d")
 
         # get pscp if exists, else = 0
         try:
-            self.prcp = float(row[self.data_columns['prcp']])
+            self._prcp = float(row[self.data_columns['prcp']])
         except ValueError:
-            self.prcp = 0
+            self._prcp = 0
         
         # get tmax if exist
         try:
-            self.tmax = float(row[self.data_columns['tmax']])
+            self._tmax = float(row[self.data_columns['tmax']])
         except ValueError:
-            self.tmax = None
+            self._tmax = None
 
         # get tmin if exist
         try:
-            self.tmin = float(row[self.data_columns['tmin']])
+            self._tmin = float(row[self.data_columns['tmin']])
         except ValueError:
-            self.tmin = None
+            self._tmin = None
 
-    def join_weatherdata_query(self):
+    def _join_weatherdata_query(self):
         """join all weather data in one table row by row"""
         table_name = ""
         query = "SELECT * FROM ("
@@ -128,8 +130,8 @@ class WeatherData():
         return query
 
     def join_weatherdata_rows(self, header_line=False):
-        """join all weather data in one table row by row tables"""
-        query = self.join_weatherdata_query()
+        """join all weather data in one table row by row lists"""
+        query = self._join_weatherdata_query()
         
         if header_line: 
             weather_data_rows = [['cur_date', 'prcp', 'tmax', 'tmin', 'station']]
@@ -150,20 +152,43 @@ class WeatherData():
 
     def join_weatherdata_columns_dict(self):
         """join all weather data in one table column by column as dict"""
-        weather_data_columns = {
-            'cur_date': '',
-            'prcp': '',
-            'tmax': '',
-            'tmin': ''
-        }
-        query = self.join_weatherdata_query()
+                
+        weather_data_columns = {name: list() for name in self.weatherdatatypes}
+
+        query = self._join_weatherdata_query()
 
         with self.engine.connect() as conn:
-            weather_data_columns = []
             for row in conn.execute(text(query)):
-                weather_data_columns.append(row)
+                for datatype in range(len(self.weatherdatatypes)):
+                    if self.weatherdatatypes[datatype] == 'cur_date':
+                        value = datetime.strptime(row[datatype], "%Y-%m-%d")
+                    else:
+                        value = float(row[datatype])
+                    weather_data_columns[self.weatherdatatypes[datatype]].append(value)
 
         return weather_data_columns
+
+    def get_station_data_columns(self, station_name):
+        """dict with weather data for given station"""
+
+        weather_data_columns = {name: list() for name in self.weatherdatatypes}
+
+        query = f"SELECT * FROM {station_name};"
+        
+        with self.engine.connect() as conn:
+            for row in conn.execute(text(query)):
+                for datatype in range(len(self.weatherdatatypes) - 1):
+                    weather_data_columns[self.weatherdatatypes[datatype]].append(row[datatype])
+
+        return weather_data_columns
+
+    def weather_stations_in_db(self):
+        """return list of tables in db"""
+        stations = list()
+        for table in self.metadata_obj.tables:
+            table_name = str(table)
+            stations.append(table_name)
+        return stations
         
 
 if __name__ == '__main__':
@@ -175,15 +200,19 @@ if __name__ == '__main__':
     # all_data = wd.join_weatherdata_rows()
     # print(all_data[:10])
 
-    table_name = wd.metadata_obj.tables['kyiv']
-    col_name = "tmax"
-    lim = 10
+    # table_name = wd.metadata_obj.tables['kyiv']
+    # col_name = "tmax"
+    # lim = 10
 
-    query = f"SELECT {col_name} FROM {table_name} LIMIT {lim};"
+    # query = f"SELECT {col_name} FROM {table_name} LIMIT {lim};"
 
-    with wd.engine.connect() as conn:
-        result = conn.execute(text(query))
-        values = result.fetchall()
-        print(values)
+    # with wd.engine.connect() as conn:
+    #     result = conn.execute(text(query))
+    #     values = result.fetchall()
+    #     print(values)
 
+    all_data = wd.join_weatherdata_columns_dict()
+    # print(all_data)
+    print("dates: ", len(all_data['cur_date']))
+    print("tmax: ", len(all_data['tmax']))
     
