@@ -10,7 +10,7 @@ class Plotly_Wd_Charts():
         pass
 
     def compare_all_stations(self, weatherdata):
-        """drow a chart with given weatherdatatype for all stations in db"""
+        """drow a chart (pandas) with given weatherdatatype for all stations in db"""
         all_data = weatherdata.get_station_data_columns()
         while True:
             wd_to_compare = int(input('choose data to comare (prcp:1, tmax: 2, tmin: 3): '))
@@ -23,17 +23,19 @@ class Plotly_Wd_Charts():
             if chart_title: chart_title += f", {sttn.title()}"
             else: chart_title += f"{sttn.title()}"
         
+        # chart labels:
         chart_title = f"{wd_to_compare.upper()} for " + chart_title
         labels = {
             'cur_date': 'date',
             wd_to_compare: wd_to_compare.upper()
         }
+        # drow a chart
         fig = px.line(all_data, x='cur_date', y=wd_to_compare, 
                     color='station', labels=labels, title=chart_title, )
         fig.show()
 
     def compare_tmin_tmax(self, weatherdata):
-        """drow a chart with max and min temp comparison"""
+        """drow a chart with max and min temp comparison in sepate window"""
         stations = weatherdata.weather_stations_in_db()
         while True:
             i = 1

@@ -1,7 +1,6 @@
 from distutils.util import execute
-from select import select
 from pymysql import Date
-from sqlalchemy import MetaData, DATE, NUMERIC, VARCHAR, create_engine, Table, Column, Integer, String, Text, insert, func, cast, text
+from sqlalchemy import MetaData, DATE, NUMERIC, create_engine, Table, Column, text
 import csv
 from datetime import datetime
 
