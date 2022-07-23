@@ -8,12 +8,6 @@ class Plotly_Wd_Charts():
     def __init__(self) -> None:
         pass
 
-    # def __init__(self, weatherdata):
-    #     """initialize instance, connect to WeatherData"""
-    #     self.weatherdatatypes = weatherdata.weatherdatatypes
-    #     self.all_data = weatherdata.get_station_data_columns()
-    #     self.stations = weatherdata.weather_stations_in_db()
-
     def compare_all_stations(self, weatherdata):
         """drow a chart with given weatherdatatype for all stations in db"""
         all_data = weatherdata.get_station_data_columns()
@@ -42,9 +36,10 @@ class Plotly_Wd_Charts():
         fig, ax = plt.subplots()
         ax.plot(dx['cur_date'], dx['tmax'], c="red", alpha=0.5)
         ax.plot(dx['cur_date'], dx['tmin'], c="blue", alpha=0.5)
+        
         # try to fill gap between tmin & tmax if they are without breaks
         try:
-            plt.fill_between(dx['cur_date'], wd_barca['tmax'], dx['tmin'], facecolor='blue', alpha=0.1)
+            plt.fill_between(dx['cur_date'], dx['tmax'], dx['tmin'], facecolor='blue', alpha=0.1)
         except:
             pass
         # display the diagramm
