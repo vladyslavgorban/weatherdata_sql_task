@@ -1,3 +1,4 @@
+from cProfile import label
 from matplotlib import pyplot as plt
 import plotly.express as px
 
@@ -15,7 +16,20 @@ class Plotly_Wd_Charts():
             wd_to_compare = int(input('choose data to comare (prcp:1, tmax: 2, tmin: 3): '))
             if wd_to_compare in (1, 2, 3): break
         wd_to_compare = weatherdata.weatherdatatypes[wd_to_compare]
-        fig = px.line(all_data, x='cur_date', y=wd_to_compare, color='station')
+
+        stations = weatherdata.weather_stations_in_db()
+        chart_title =''
+        for sttn in stations:
+            if chart_title: chart_title += f", {sttn.title()}"
+            else: chart_title += f"{sttn.title()}"
+        
+        chart_title = f"{wd_to_compare.upper()} for " + chart_title
+        labels = {
+            'cur_date': 'date',
+            wd_to_compare: wd_to_compare.upper()
+        }
+        fig = px.line(all_data, x='cur_date', y=wd_to_compare, 
+                    color='station', labels=labels, title=chart_title, )
         fig.show()
 
     def compare_tmin_tmax(self, weatherdata):
