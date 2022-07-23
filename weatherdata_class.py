@@ -157,24 +157,6 @@ class WeatherData():
 
         return weather_data_rows
 
-    # def join_weatherdata_columns_dict(self):
-    #     """join all weather data in one table column by column as dict"""
-                
-    #     weather_data_columns = {name: list() for name in self.weatherdatatypes}
-
-    #     query = self._join_weatherdata_query()
-
-    #     with self.engine.connect() as conn:
-    #         for row in conn.execute(text(query)):
-    #             for datatype in range(len(self.weatherdatatypes)):
-    #                 if self.weatherdatatypes[datatype] == 'cur_date':
-    #                     value = datetime.strptime(row[datatype], "%Y-%m-%d")
-    #                 else:
-    #                     value = float(row[datatype])
-    #                 weather_data_columns[self.weatherdatatypes[datatype]].append(value)
-
-    #     return weather_data_columns
-
     def get_station_data_columns(self, station_name=None):
         """dict with weather data for all db or given station"""
 
@@ -209,31 +191,4 @@ class WeatherData():
         for table in self.metadata_obj.tables:
             table_name = str(table)
             stations.append(table_name)
-        return stations
-        
-
-if __name__ == '__main__':
-    wd = WeatherData()
-    # wd.get_data_from_csv('barca', 'data/BARCELONA_weather_2022.csv')
-    # wd.get_data_from_csv('kyiv', 'data/kyiv_weather_2022.csv')
-    # wd.get_data_from_csv('london', 'data/HEATHROW_weather_2022.csv')
-
-    # all_data = wd.join_weatherdata_rows()
-    # print(all_data[:10])
-
-    # table_name = wd.metadata_obj.tables['kyiv']
-    # col_name = "tmax"
-    # lim = 10
-
-    # query = f"SELECT {col_name} FROM {table_name} LIMIT {lim};"
-
-    # with wd.engine.connect() as conn:
-    #     result = conn.execute(text(query))
-    #     values = result.fetchall()
-    #     print(values)
-
-    all_data = wd.join_weatherdata_columns_dict()
-    # print(all_data)
-    print("dates: ", len(all_data['cur_date']))
-    print("tmax: ", len(all_data['tmax']))
-    
+        return stations   
