@@ -1,5 +1,6 @@
 """get data from CSV files in Data folder (downoaded from https://www.ncdc.noaa.gov/), 
 save data to SQLIte db, extract for further charts, draw different type of charts"""
+
 from weatherdata_class import WeatherData
 from plotly_wd_charts import Plotly_Wd_Charts
 
