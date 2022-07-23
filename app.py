@@ -11,6 +11,6 @@ wd.get_data_from_csv('kyiv', 'data/kyiv_weather_2022.csv')
 wd.get_data_from_csv('london', 'data/HEATHROW_weather_2022.csv')
 
 # draw two charts nypes
-p_charts = Plotly_Wd_Charts()
+p_charts = Wd_Charts()
 p_charts.compare_all_stations(wd)
-p_charts.compare_tmin_tmax(wd)\
+p_charts.compare_tmin_tmax(wd)

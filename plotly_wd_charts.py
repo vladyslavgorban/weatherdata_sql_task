@@ -1,8 +1,9 @@
 from cProfile import label
 from matplotlib import pyplot as plt
 import plotly.express as px
+# https://plotly.com/python/reference/
 
-class Plotly_Wd_Charts():
+class Wd_Charts():
     """class for plots drawing using plotly 
     and weatherdata from WeatherData class"""
 
@@ -10,7 +11,8 @@ class Plotly_Wd_Charts():
         pass
 
     def compare_all_stations(self, weatherdata):
-        """drow a chart (pandas) with given weatherdatatype for all stations in db"""
+        """drow a chart (pandas) with given weatherdatatype 
+        for all stations in db (plotly)"""
         all_data = weatherdata.get_station_data_columns()
         while True:
             wd_to_compare = int(input('choose data to comare (prcp:1, tmax: 2, tmin: 3): '))
@@ -35,7 +37,7 @@ class Plotly_Wd_Charts():
         fig.show()
 
     def compare_tmin_tmax(self, weatherdata):
-        """drow a chart with max and min temp comparison in sepate window"""
+        """drow a chart with max and min temp comparison in sepate window (pyplot)"""
         stations = weatherdata.weather_stations_in_db()
         while True:
             i = 1
