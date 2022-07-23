@@ -2,7 +2,7 @@
 save data to SQLIte db, extract for further charts, draw different type of charts"""
 
 from weatherdata_class import WeatherData
-from plotly_wd_charts import Plotly_Wd_Charts
+from plotly_wd_charts import Wd_Charts
 
 # weatherdata instance, add data from csv
 wd = WeatherData()
