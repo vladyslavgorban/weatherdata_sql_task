@@ -21,10 +21,7 @@ class WeatherData():
 
     def get_data_from_csv(self, name, filepath):
         """get data from given csv filepath and store it to named table in db"""
-        if name in self.metadata_obj.tables:
-            print(f"Table '{name}' already exsists. Rename or delete'")
-            return
-        
+   
         # create table
         self._create_table(name)
 
